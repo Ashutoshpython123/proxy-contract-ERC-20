@@ -287,10 +287,10 @@ contract StandardSale is Ownable, Pausable {
     uint8 public decimals;
     uint256 public totalSupply;
     uint256 public totalBalance;
-    uint256 public transactions;
+    uint256 public transactions;   
     IERC20 public ERC20Interface;
 
-     struct user {
+    struct user {
         uint256 status;
         uint256 investedAmount;
     }
@@ -348,8 +348,19 @@ contract StandardSale is Ownable, Pausable {
     function unpause() public onlyOwner {
         _unpause();
     }
-   
-   function buyTokens() public payable {
+
+    function whitelistUsers(address[] memory _users)
+        external
+        onlyOwner
+    {
+        require(_users.length > 0, "Empty Array");
+        for (uint256 i = 0; i < _users.length; i++) {
+            userDetails[_users[i]].status = 1;
+        }
+    }
+
+    function buyTokens() public payable {
+        require(userDetails[msg.sender].status == 1, "not whitelisted");
         require(block.timestamp >= saleStart, "Sale not started yet");
         require(block.timestamp <= saleEnd, "Sale Ended");
         require(
